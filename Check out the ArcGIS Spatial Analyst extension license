@@ -1,0 +1,32 @@
+# Import system modules
+import arcpy
+from arcpy import env
+from arcpy.sa import *
+
+# Set environment settings
+env.workspace = "D:\hidroloji\python"
+
+# Set local variables
+inRaster = "demconwgs_35.tif"
+inMaskData = "sinir.shp"
+
+# Check out the ArcGIS Spatial Analyst extension license
+arcpy.CheckOutExtension("Spatial")
+
+# Execute ExtractByMask
+outExtractByMask = ExtractByMask(inRaster, inMaskData)
+outFill = Fill(outExtractByMask)#bosluk doldurma
+outFlowDirection = FlowDirection(outFill, "NORMAL")#akis yon
+outFlowAccumulation = FlowAccumulation(outFlowDirection)#akis top
+outBasin = Basin(outFlowDirection)#havza
+outStreamOrder = StreamOrder(outFlowAccumulation, outFlowDirection , "STRAHLER")
+StreamToFeature(outStreamOrder, outFlowDirection, "D:\hidroloji\python\catalanmavctr.shp", "NO_SIMPLIFY")
+arcpy.RasterToPolygon_conversion(outBasin,  "D:\hidroloji\python\havzavctr.shp", "NO_SIMPLIFY","VALUE")
+
+# Save the output 
+#outExtractByMask.save("D:\hidroloji\python\keshidro")
+#outFill.save("D:\hidroloji\python\boslukhidro")
+#outFlowDirection.save("D:\hidroloji\python\akisyon")
+#outFlowAccumulation.save("D:\hidroloji\python\akistop")
+#outBasin.save("D:\hidroloji\python\havza")
+#outStreamOrder.save("D:\hidroloji\python\havza\catalanma")
